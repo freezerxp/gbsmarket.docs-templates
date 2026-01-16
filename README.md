@@ -1,2 +1,2 @@
-# gbsmarket.docs-templates
+# Шаблоны для GBS.Market
 Шаблоны документов/печатных форм для кассовой программы GBS.market
