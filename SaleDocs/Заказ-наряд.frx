@@ -1,0 +1,362 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="06/20/2009 22:40:42" ReportInfo.Modified="09/28/2024 13:44:39" ReportInfo.CreatorVersion="2020.1.28.0">
+  <ScriptText>using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Data;
+using FastReport;
+using FastReport.Data;
+using FastReport.Dialog;
+using FastReport.Barcode;
+using FastReport.Table;
+using FastReport.Utils;
+
+namespace FastReport
+{
+  public class ReportScript
+  {
+    public decimal GetNds(decimal nds)
+    {
+      return nds == -1? 0 : nds;
+    }
+
+    private void TextBox8_Click(object sender, EventArgs e)
+    {
+      
+    }
+
+    private void Label15_Click(object sender, EventArgs e)
+    {
+      
+    }
+
+    private void GroupBox1_Click(object sender, EventArgs e)
+    {
+      
+    }
+  }
+}
+</ScriptText>
+  <Dictionary>
+    <BusinessObjectDataSource Name="goods" ReferenceName="goods" DataType="System.Collections.Generic.List`1[[Gbs.Helpers.FR.BackEnd.Entities.ListItems.BasketItem, Market, Version=6.6.0.2475, Culture=neutral, PublicKeyToken=null]]" Enabled="true">
+      <Column Name="DocumentUid" DataType="System.Guid"/>
+      <Column Name="Good" DataType="Gbs.Helpers.FR.BackEnd.Entities.Goods.Good, Market, Version=6.6.0.2475, Culture=neutral, PublicKeyToken=null">
+        <Column Name="BusinessObjectDataSource2" Alias="Properties" DataType="System.Collections.Generic.Dictionary`2[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]" PropName="Properties">
+          <Column Name="Key" DataType="System.String"/>
+          <Column Name="Value" Enabled="false" DataType="System.Object"/>
+        </Column>
+        <Column Name="Uid" DataType="System.Guid"/>
+        <Column Name="Id" DataType="System.Int32"/>
+        <Column Name="Name" DataType="System.String"/>
+        <Column Name="Group" DataType="Gbs.Helpers.FR.BackEnd.Entities.Goods.GoodGroup, Market, Version=6.6.0.2475, Culture=neutral, PublicKeyToken=null">
+          <Column Name="Uid" DataType="System.Guid"/>
+          <Column Name="Name" DataType="System.String"/>
+          <Column Name="ParentGroupUid" DataType="System.Guid"/>
+          <Column Name="GoodsType" DataType="System.String"/>
+          <Column Name="UnitsUid" DataType="System.Guid"/>
+          <Column Name="NeedComment" DataType="System.Boolean" BindableControl="CheckBox"/>
+          <Column Name="IsDataParent" DataType="System.Boolean" BindableControl="CheckBox"/>
+          <Column Name="IsRequestCount" DataType="System.Boolean" BindableControl="CheckBox"/>
+          <Column Name="TaxRateNumber" DataType="System.Int32"/>
+          <Column Name="KkmSectionNumber" DataType="System.Int32"/>
+          <Column Name="IsFreePrice" DataType="System.Boolean" BindableControl="CheckBox"/>
+          <Column Name="DecimalPlace" DataType="System.Int32"/>
+          <Column Name="RuTaxSystem" DataType="System.String"/>
+          <Column Name="RuFfdGoodsType" DataType="System.String"/>
+          <Column Name="RuMarkedProductionType" DataType="System.String"/>
+          <Column Name="TaxRateNumberText" DataType="System.String"/>
+        </Column>
+        <Column Name="Barcode" DataType="System.String"/>
+        <Column Name="UnitName" DataType="System.String"/>
+        <Column Name="Unit" DataType="Gbs.Helpers.FR.BackEnd.Entities.Goods.Unit, Market, Version=6.6.0.2475, Culture=neutral, PublicKeyToken=null">
+          <Column Name="FullName" DataType="System.String"/>
+          <Column Name="ShortName" DataType="System.String"/>
+          <Column Name="Code" DataType="System.String"/>
+        </Column>
+        <Column Name="VatValue" DataType="System.Decimal"/>
+        <Column Name="NdsName" DataType="System.String"/>
+        <Column Name="NdsValue" DataType="System.Decimal"/>
+        <Column Name="TotalCount" DataType="System.Decimal"/>
+        <Column Name="Description" DataType="System.String"/>
+        <Column Name="Barcodes" DataType="System.String"/>
+      </Column>
+      <Column Name="Quantity" DataType="System.Decimal"/>
+      <Column Name="Price" DataType="System.Decimal"/>
+      <Column Name="BuyPrice" DataType="System.Decimal"/>
+      <Column Name="Discount" DataType="System.Decimal"/>
+      <Column Name="Comment" DataType="System.String"/>
+      <Column Name="DiscountSum" DataType="System.Decimal"/>
+      <Column Name="Sum" DataType="System.Decimal"/>
+      <Column Name="SumLessNds" DataType="System.Decimal"/>
+      <Column Name="NdsValue" DataType="System.Decimal"/>
+      <Column Name="NdsSum" DataType="System.Decimal"/>
+      <Column Name="GoodModificationName" DataType="System.String"/>
+      <Column Name="DisplayedName" DataType="System.String"/>
+      <Column Name="DocumentsType" DataType="System.Int32"/>
+      <Column Name="IsFiscal" DataType="System.Boolean" BindableControl="CheckBox"/>
+      <Column Name="GoodUid" DataType="System.Guid"/>
+      <Column Name="GoodModificationBarcode" DataType="System.String"/>
+    </BusinessObjectDataSource>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyPublicPointName" DataType="System.String"/>
+    <Parameter Name="CompanyInfo" DataType="System.String"/>
+    <Parameter Name="CompanyInn" DataType="System.String"/>
+    <Parameter Name="CompanyKPP" DataType="System.String"/>
+    <Parameter Name="CompanyOGRN" DataType="System.String"/>
+    <Parameter Name="CompanyBank" DataType="System.String"/>
+    <Parameter Name="CompanyBik" DataType="System.String"/>
+    <Parameter Name="CompanyKs" DataType="System.String"/>
+    <Parameter Name="CompanyRs" DataType="System.String"/>
+    <Parameter Name="DbName" DataType="System.String"/>
+    <Parameter Name="DocumentDate" DataType="System.DateTime"/>
+    <Parameter Name="DocumentNumber" DataType="System.String"/>
+    <Parameter Name="DocumentComment" DataType="System.String"/>
+    <Parameter Name="ClientName" DataType="System.String"/>
+    <Parameter Name="ClientPhone" DataType="System.String"/>
+    <Parameter Name="ClientBarcode" DataType="System.String"/>
+    <Parameter Name="ClientAddress" DataType="System.String"/>
+    <Parameter Name="ClientBank" DataType="System.String"/>
+    <Parameter Name="ClientInn" DataType="System.String"/>
+    <Parameter Name="ClientKPP" DataType="System.String"/>
+    <Parameter Name="ClientKs" DataType="System.String"/>
+    <Parameter Name="ClientBik" DataType="System.String"/>
+    <Parameter Name="ClientOGRN" DataType="System.String"/>
+    <Parameter Name="ClientRs" DataType="System.String"/>
+    <Parameter Name="ClientEmail" DataType="System.String"/>
+    <Parameter Name="ClientBonusesSum" DataType="System.Decimal"/>
+    <Parameter Name="ClientCreditSum" DataType="System.Decimal"/>
+    <Parameter Name="ClientComment" DataType="System.String"/>
+    <Parameter Name="UserName" DataType="System.String"/>
+    <Parameter Name="UserPhone" DataType="System.String"/>
+    <Parameter Name="TotalPaymentSum" DataType="System.Decimal"/>
+    <Parameter Name="IsFiscal" DataType="System.Boolean"/>
+    <Parameter Name="TableNum" DataType="System.String"/>
+    <Parameter Name="GuestsCount" DataType="System.String"/>
+    <Parameter Name="ClientBirthday" DataType="System.String"/>
+    <Parameter Name="DiscountOnSale" DataType="System.Decimal"/>
+    <Parameter Name="5eb4eba4-b8d8-45bf-8be5-4bb806a1ce46" DataType="System.String"/>
+    <Parameter Name="6a86ccfb-75a1-4b36-9cff-0636eadee6b7" DataType="System.String"/>
+    <Parameter Name="ffe70add-ba07-42d8-beee-1bb0d4cc6a36" DataType="System.String"/>
+    <Parameter Name="53836f50-e085-41bf-ba9c-a16010842bf0" DataType="System.String"/>
+    <Parameter Name="3461c1d7-8e87-4d0e-9fa3-46fe54a36548" DataType="System.String"/>
+    <Total Name="TotalService" Expression="[goods.Sum]" Evaluator="Data1" EvaluateCondition="[goods.Good.Group.GoodsType] == &quot;Услуги&quot;"/>
+    <Total Name="TotalGood" Expression="[goods.Sum]" Evaluator="Data2" EvaluateCondition="[goods.Good.Group.GoodsType] != &quot;Услуги&quot;"/>
+  </Dictionary>
+  <ReportPage Name="Page1" RawPaperSize="9" LeftMargin="5" RightMargin="5" FirstPageSource="15" OtherPagesSource="15" Watermark.Font="Arial, 60pt">
+    <ReportTitleBand Name="ReportTitle1" Width="756" Height="292.95" CanGrow="true">
+      <TextObject Name="Text1" Width="756" Height="37.8" Text="[CompanyName]&#13;&#10;ИНН: [CompanyInn]" Font="Arial, 10pt, style=Bold"/>
+      <TextObject Name="Text2" Top="47.25" Width="756" Height="28.35" Text="ЗАКАЗ-НАРЯД №[DocumentNumber] от [DocumentDate] года" HorzAlign="Center" VertAlign="Center" Font="Arial, 12pt, style=Bold">
+        <Formats>
+          <GeneralFormat/>
+          <DateFormat/>
+        </Formats>
+      </TextObject>
+      <TextObject Name="Text3" Top="85.05" Width="481.95" Height="66.15" GrowToBottom="true" Text="Заказчик: [ClientName]&#13;&#10;Адрес: [ClientAddress]&#13;&#10;Телефон: [ClientPhone]&#13;&#10;Плательщик: [ClientName]" Font="Arial, 10pt"/>
+      <TextObject Name="Text4" Left="472.5" Top="85.05" Width="283.5" Height="66.15" GrowToBottom="true" Text="Заказ принял: [UserName]&#13;&#10;Расчет: &#13;&#10;Дата закрытия:&#13;&#10;Заказ закрыл: [UserName]" Font="Arial, 10pt"/>
+      <LineObject Name="Line1" Left="-9.45" Top="189" Width="765.45"/>
+      <TableObject Name="Table1" Top="217.35" Width="757.89" Height="56.7">
+        <TableColumn Name="Column1" Width="91.35"/>
+        <TableColumn Name="Column4" Width="151.2"/>
+        <TableColumn Name="Column2" Width="119.7"/>
+        <TableColumn Name="Column5" Width="151.2"/>
+        <TableColumn Name="Column3" Width="100.8"/>
+        <TableColumn Name="Column6" Width="143.64"/>
+        <TableRow Name="Row1">
+          <TableCell Name="Cell1" Text="Двигатель: " Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell14" Text="[DvigatelTextBox.Text]" Font="Arial, 10pt"/>
+          <TableCell Name="Cell2" Text="Техпаспорт № " Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell17" Text="[PassportTextBox.Text]" Font="Arial, 10pt"/>
+          <TableCell Name="Cell3" Text="Гос. номер: " Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell20" Text="[NumberTextBox.Text]" Font="Arial, 10pt"/>
+        </TableRow>
+        <TableRow Name="Row2">
+          <TableCell Name="Cell6" Text="VIN:" Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell15" Text="[VinTextBox.Text]" Font="Arial, 10pt"/>
+          <TableCell Name="Cell7" Text="Кузов №" Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell18" Text="[KuzovNumTextBox.Text]" Font="Arial, 10pt"/>
+          <TableCell Name="Cell8" Text="Год выпуска:" Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell21" Text="[GodNumericUpDown.Value]" Font="Arial, 10pt"/>
+        </TableRow>
+        <TableRow Name="Row3">
+          <TableCell Name="Cell11" Text="Класс:" Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell16" Text="[KlassTextBox.Text]" Font="Arial, 10pt"/>
+          <TableCell Name="Cell12" Text="Тип кузова: " Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell19" Text="[KuzovTypeTextBox.Text]" Font="Arial, 10pt"/>
+          <TableCell Name="Cell13" Text="Пробег, км:" Font="Arial, 10pt, style=Bold, Italic"/>
+          <TableCell Name="Cell22" Text="[ProbegNumericUpDown.Value]" Format="Number" Format.UseLocale="false" Format.DecimalDigits="0" Format.DecimalSeparator="," Format.GroupSeparator=" " Format.NegativePattern="1" Font="Arial, 10pt"/>
+        </TableRow>
+      </TableObject>
+      <TextObject Name="Text5" Top="198.45" Width="151.2" Height="18.9" Text="Марка и модель ТС: " Font="Arial, 10pt, style=Bold"/>
+      <TextObject Name="Text6" Top="274.05" Width="756" Height="18.9" GrowToBottom="true" Text="Причина обращения: [DescriptionTextBox.Text]" VertAlign="Bottom" Font="Arial, 10pt, style=Italic"/>
+      <TextObject Name="Text7" Left="141.75" Top="198.45" Width="151.2" Height="18.9" Text="[ModelTextBox.Text]" Font="Arial, 10pt"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="346.6" Width="756" Height="18.9" CanGrow="true" CanShrink="true" DataSource="goods" Filter="[goods.Good.Group.GoodsType] == &quot;Услуги&quot;">
+      <TableObject Name="Table3" Width="755.29" Height="18.9" GrowToBottom="true">
+        <TableColumn Name="Column13" Width="59.96"/>
+        <TableColumn Name="Column14" Width="313.74"/>
+        <TableColumn Name="Column15" Width="78.86"/>
+        <TableColumn Name="Column16" Width="78.86"/>
+        <TableColumn Name="Column17" Width="97.76"/>
+        <TableColumn Name="Column18" Width="126.11"/>
+        <TableRow Name="Row5" AutoSize="true">
+          <TableCell Name="Cell29" Border.Lines="All" Text="[Row#]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell30" Border.Lines="All" Text="[goods.DisplayedName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell31" Border.Lines="All" Text="шт." HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell32" Border.Lines="All" Text="[goods.Quantity]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="0" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell33" Border.Lines="All" Text="[goods.Price]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell34" Border.Lines="All" Text="[goods.Sum]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+        </TableRow>
+      </TableObject>
+      <DataHeaderBand Name="DataHeader1" Top="296.15" Width="756" Height="47.25" CanShrink="true" RepeatOnEveryPage="true">
+        <TextObject Name="Text8" Top="9.45" Width="264.6" Height="18.9" Text="Перечень выполняемых работ:" Font="Arial, 11pt, style=Bold"/>
+        <TableObject Name="Table2" Top="28.35" Width="755.29" Height="18.9">
+          <TableColumn Name="Column7" Width="59.96"/>
+          <TableColumn Name="Column8" Width="313.74"/>
+          <TableColumn Name="Column9" Width="78.86"/>
+          <TableColumn Name="Column10" Width="78.86"/>
+          <TableColumn Name="Column11" Width="97.76"/>
+          <TableColumn Name="Column12" Width="126.11"/>
+          <TableRow Name="Row4">
+            <TableCell Name="Cell23" Border.Lines="All" Text="№ п/п" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell24" Border.Lines="All" Text="Услуга" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell25" Border.Lines="All" Text="Ед. изм." HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell26" Border.Lines="All" Text="Кол-во" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell27" Border.Lines="All" Text="Цена" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell28" Border.Lines="All" Text="Сумма" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          </TableRow>
+        </TableObject>
+      </DataHeaderBand>
+      <DataFooterBand Name="DataFooter1" Top="368.7" Width="756" Height="18.9" CanShrink="true" KeepWithData="true">
+        <TableObject Name="Table4" Width="755.29" Height="18.9">
+          <TableColumn Name="Column19" Width="59.96"/>
+          <TableColumn Name="Column20" Width="313.74"/>
+          <TableColumn Name="Column21" Width="78.86"/>
+          <TableColumn Name="Column22" Width="78.86"/>
+          <TableColumn Name="Column23" Width="97.76"/>
+          <TableColumn Name="Column24" Width="126.11"/>
+          <TableRow Name="Row6">
+            <TableCell Name="Cell35" Border.Lines="All" Text="Итого:" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold" ColSpan="5"/>
+            <TableCell Name="Cell36" Border.Lines="All" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell37" Border.Lines="All" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell38" Border.Lines="All" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell39" Border.Lines="All" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell40" Border.Lines="All" Text="[TotalService]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+          </TableRow>
+        </TableObject>
+      </DataFooterBand>
+    </DataBand>
+    <DataBand Name="Data2" Top="441.25" Width="756" Height="18.9" CanGrow="true" CanShrink="true" CanBreak="true" DataSource="goods" Filter="[goods.Good.Group.GoodsType] != &quot;Услуги&quot;">
+      <TableObject Name="Table6" Width="755.29" Height="18.9" GrowToBottom="true">
+        <TableColumn Name="Column31" Width="59.96"/>
+        <TableColumn Name="Column32" Width="313.74"/>
+        <TableColumn Name="Column33" Width="78.86"/>
+        <TableColumn Name="Column34" Width="78.86"/>
+        <TableColumn Name="Column35" Width="97.76"/>
+        <TableColumn Name="Column36" Width="126.11"/>
+        <TableRow Name="Row8" AutoSize="true">
+          <TableCell Name="Cell47" Border.Lines="All" Text="[Row#]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell48" Border.Lines="All" Text="[goods.DisplayedName]" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell49" Border.Lines="All" Text="[goods.Good.UnitName]" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell50" Border.Lines="All" Text="[goods.Quantity]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="0" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell51" Border.Lines="All" Text="[goods.Price]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell52" Border.Lines="All" Text="[goods.Sum]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+        </TableRow>
+      </TableObject>
+      <DataHeaderBand Name="DataHeader2" Top="390.8" Width="756" Height="47.25">
+        <TextObject Name="Text9" Top="9.45" Width="349.65" Height="18.9" Text="Используемые запасные части (материалы):" Font="Arial, 11pt, style=Bold"/>
+        <TableObject Name="Table5" Top="28.35" Width="755.29" Height="18.9">
+          <TableColumn Name="Column25" Width="59.96"/>
+          <TableColumn Name="Column26" Width="313.74"/>
+          <TableColumn Name="Column27" Width="78.86"/>
+          <TableColumn Name="Column28" Width="78.86"/>
+          <TableColumn Name="Column29" Width="97.76"/>
+          <TableColumn Name="Column30" Width="126.11"/>
+          <TableRow Name="Row7">
+            <TableCell Name="Cell41" Border.Lines="All" Text="№ п/п" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell42" Border.Lines="All" Text="Наименование запчасти (материала):" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell43" Border.Lines="All" Text="Ед. изм." HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell44" Border.Lines="All" Text="Кол-во" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell45" Border.Lines="All" Text="Цена" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell46" Border.Lines="All" Text="Сумма" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          </TableRow>
+        </TableObject>
+      </DataHeaderBand>
+      <DataFooterBand Name="DataFooter2" Top="463.35" Width="756" Height="18.9" CanShrink="true" CanBreak="true">
+        <TableObject Name="Table7" Width="755.29" Height="18.9">
+          <TableColumn Name="Column37" Width="59.96"/>
+          <TableColumn Name="Column38" Width="313.74"/>
+          <TableColumn Name="Column39" Width="78.86"/>
+          <TableColumn Name="Column40" Width="78.86"/>
+          <TableColumn Name="Column41" Width="97.76"/>
+          <TableColumn Name="Column42" Width="126.11"/>
+          <TableRow Name="Row9">
+            <TableCell Name="Cell53" Border.Lines="All" Text="Итого:" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold" ColSpan="5"/>
+            <TableCell Name="Cell54" Border.Lines="All" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell55" Border.Lines="All" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell56" Border.Lines="All" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell57" Border.Lines="All" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+            <TableCell Name="Cell58" Border.Lines="All" Text="[TotalGood]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+          </TableRow>
+        </TableObject>
+      </DataFooterBand>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="485.45" Width="756" Height="207.9" CanGrow="true" CanBreak="true">
+      <TableObject Name="Table8" Top="18.9" Width="755.92" Height="37.8" Border.Lines="All">
+        <TableColumn Name="Column43" Width="377.96"/>
+        <TableColumn Name="Column44" Width="377.96"/>
+        <TableRow Name="Row10">
+          <TableCell Name="Cell59" Border.Lines="All" Text="Общая стоимость ремонта:" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell60" Border.Lines="All" Text="[[TotalService]+[TotalGood]]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+        </TableRow>
+        <TableRow Name="Row11" AutoSize="true">
+          <TableCell Name="Cell64" Border.Lines="All" Text="[ToWordsRu([TotalService]+[TotalGood])]" Font="Arial, 10pt, style=Bold" ColSpan="2"/>
+          <TableCell Name="Cell65" Border.Lines="All" Font="Arial, 10pt"/>
+        </TableRow>
+      </TableObject>
+      <TextObject Name="Text10" Left="9.45" Top="75.6" Width="340.2" Height="47.25" Text="НДС не начисляется (СТО не является плательщиком НДС)&#13;&#10;Комплектность ТС, ценные вещи, которые в нем находятся:&#13;&#10;При приеме ТС имеет следующие повереждения: &#13;&#10;Транспортное средство принял" HorzAlign="Justify" Font="Arial, 8pt, style=Italic"/>
+      <TextObject Name="Text11" Left="378" Top="75.6" Width="368.55" Height="47.25" Text="Транспортное средство сдал, с условиями выполнения заказа,&#13;&#10;инструкциями касательно правил проведения на территории СТО&#13;&#10;ознакомлен и обязуюсь их выполнять" HorzAlign="Justify" VertAlign="Center" Font="Arial, 8pt, style=Italic"/>
+      <TextObject Name="Text12" Left="9.45" Top="141.75" Width="132.3" Height="18.9" Text="От исполнителя" HorzAlign="Justify" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="Text13" Left="378" Top="141.75" Width="132.3" Height="18.9" Text="От заказчика" HorzAlign="Justify" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="Text14" Left="9.45" Top="160.65" Width="321.3" Height="18.9" Border.Lines="Bottom" HorzAlign="Justify" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="Text15" Left="378" Top="160.65" Width="321.3" Height="18.9" Border.Lines="Bottom" HorzAlign="Justify" VertAlign="Center" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="Text16" Left="9.45" Top="179.55" Width="141.75" Height="18.9" Text="фамилия, имя, отчество" Font="Arial, 8pt, style=Italic"/>
+      <TextObject Name="Text17" Left="274.05" Top="179.55" Width="56.7" Height="18.9" Text="подпись" Font="Arial, 8pt, style=Italic"/>
+      <TextObject Name="Text18" Left="378" Top="179.55" Width="141.75" Height="18.9" Text="фамилия, имя, отчество" Font="Arial, 8pt, style=Italic"/>
+      <TextObject Name="Text19" Left="642.6" Top="179.55" Width="56.7" Height="18.9" Text="подпись" Font="Arial, 8pt, style=Italic"/>
+    </ReportSummaryBand>
+  </ReportPage>
+  <DialogPage Name="Form1" Width="540" Height="424" AcceptButton="btnOk" Font="Tahoma, 8pt" Text="Информация о ТС">
+    <ButtonControl Name="btnOk" Left="438" Top="354" Anchor="Bottom, Right" Font="Tahoma, 8pt" TabIndex="0" Text="ОК" DialogResult="OK"/>
+    <LabelControl Name="Label1" Left="12" Top="18" Width="64" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Автомобиль"/>
+    <TextBoxControl Name="ModelTextBox" Left="88" Top="16" Width="168" Font="Tahoma, 8pt" TabIndex="2"/>
+    <LabelControl Name="Label3" Left="12" Top="46" Width="62" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Техпаспорт"/>
+    <TextBoxControl Name="PassportTextBox" Left="88" Top="44" Width="168" Font="Tahoma, 8pt" TabIndex="2"/>
+    <LabelControl Name="Label5" Left="264" Top="18" Width="22" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="VIN"/>
+    <TextBoxControl Name="VinTextBox" Left="300" Top="16" Width="212" Font="Tahoma, 8pt" TabIndex="2"/>
+    <LabelControl Name="Label8" Left="268" Top="46" Width="58" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Гос. номер"/>
+    <TextBoxControl Name="NumberTextBox" Left="344" Top="44" Width="168" Font="Tahoma, 8pt" TabIndex="2" ClickEvent="TextBox8_Click"/>
+    <GroupBoxControl Name="GroupBox1" Left="12" Top="120" Width="500" Height="108" Font="Tahoma, 8pt" TabIndex="3" Text="Доп. информация" ClickEvent="GroupBox1_Click">
+      <TextBoxControl Name="DvigatelTextBox" Left="72" Top="28" Width="168" Font="Tahoma, 8pt" TabIndex="2"/>
+      <LabelControl Name="Label9" Left="8" Top="32" Width="56" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Двигатель" ClickEvent="Label2_Click"/>
+      <LabelControl Name="Label10" Left="8" Top="56" Width="33" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Класс"/>
+      <TextBoxControl Name="KlassTextBox" Left="72" Top="52" Width="168" Font="Tahoma, 8pt" TabIndex="2"/>
+      <LabelControl Name="Label11" Left="248" Top="32" Width="49" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Кузов №" ClickEvent="Label2_Click"/>
+      <TextBoxControl Name="KuzovNumTextBox" Left="316" Top="28" Width="168" Font="Tahoma, 8pt" TabIndex="2"/>
+      <LabelControl Name="Label12" Left="248" Top="52" Width="60" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Тип кузова"/>
+      <TextBoxControl Name="KuzovTypeTextBox" Left="316" Top="52" Width="168" Font="Tahoma, 8pt" TabIndex="2"/>
+      <LabelControl Name="Label15" Left="8" Top="80" Width="28" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Цвет" ClickEvent="Label15_Click"/>
+      <TextBoxControl Name="ZvetTextBox" Left="72" Top="76" Width="412" Font="Tahoma, 8pt" TabIndex="2"/>
+    </GroupBoxControl>
+    <LabelControl Name="Label13" Left="12" Top="72" Width="67" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Год выпуска" ClickEvent="Label2_Click"/>
+    <NumericUpDownControl Name="GodNumericUpDown" Left="88" Top="68" Width="64" Font="Tahoma, 8pt" TabIndex="4" Text="2000" Maximum="2050" Minimum="1950" Value="2000"/>
+    <LabelControl Name="Label14" Left="12" Top="92" Width="59" Height="18" Font="Tahoma, 8pt" TabIndex="1" Text="Пробег, км" ClickEvent="Label2_Click"/>
+    <NumericUpDownControl Name="ProbegNumericUpDown" Left="88" Top="92" Width="64" Font="Tahoma, 8pt" TabIndex="4" Maximum="9999999999"/>
+    <RichTextBoxControl Name="DescriptionTextBox" Left="12" Top="252" Width="500" Font="Tahoma, 8pt" TabIndex="5" Rtf="{\rtf1\ansi\ansicpg1251\deff0\nouicompat\deflang1049{\fonttbl{\f0\fnil\fcharset204 Tahoma;}}&#13;&#10;{\*\generator Riched20 10.0.22000}\viewkind4\uc1 &#13;&#10;\pard\f0\fs17\par&#13;&#10;}&#13;&#10;"/>
+    <LabelControl Name="Label2" Left="12" Top="232" Width="126" Height="18" Font="Tahoma, 8.25pt, style=Bold" TabIndex="6" Text="Причина обращения"/>
+  </DialogPage>
+</Report>

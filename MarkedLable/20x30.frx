@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="06/20/2009 22:40:42" ReportInfo.Modified="07/08/2024 21:15:54" ReportInfo.CreatorVersion="2020.1.28.0">
+  <Dictionary>
+    <BusinessObjectDataSource Name="items" ReferenceName="items" DataType="System.Linq.Enumerable+WhereSelectListIterator`2[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[Gbs.Helpers.FR.BackEnd.Entities.MarkedCode, Market, Version=6.6.0.2465, Culture=neutral, PublicKeyToken=null]], System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" Enabled="true">
+      <Column Name="Current" DataType="Gbs.Helpers.FR.BackEnd.Entities.MarkedCode, Market, Version=6.6.0.2465, Culture=neutral, PublicKeyToken=null">
+        <Column Name="Code" DataType="System.String"/>
+      </Column>
+    </BusinessObjectDataSource>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyInfo" DataType="System.String"/>
+    <Parameter Name="ext1Name" DataType="System.String"/>
+    <Parameter Name="ext2Name" DataType="System.String"/>
+    <Parameter Name="ext3Name" DataType="System.String"/>
+    <Parameter Name="ext4Name" DataType="System.String"/>
+    <Parameter Name="ext5Name" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyPublicPointName" DataType="System.String"/>
+    <Parameter Name="CompanyInn" DataType="System.String"/>
+    <Parameter Name="CompanyKPP" DataType="System.String"/>
+    <Parameter Name="CompanyOGRN" DataType="System.String"/>
+    <Parameter Name="CompanyBank" DataType="System.String"/>
+    <Parameter Name="CompanyBik" DataType="System.String"/>
+    <Parameter Name="CompanyKs" DataType="System.String"/>
+    <Parameter Name="CompanyRs" DataType="System.String"/>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="30" PaperHeight="20" LeftMargin="0" TopMargin="0" RightMargin="0" BottomMargin="0" Watermark.Font="Arial, 60pt">
+    <DataBand Name="Data1" Width="113.4" Height="75.6" DataSource="items" KeepTogether="true">
+      <BarcodeObject Name="Barcode1" Left="28.35" Top="9.45" Width="54.81" Height="54.9" AutoSize="false" DataColumn="items.Code" ShowText="false" Barcode="Datamatrix" Barcode.SymbolSize="Auto" Barcode.Encoding="Auto" Barcode.CodePage="1252" Barcode.PixelSize="3" Barcode.AutoEncode="true"/>
+    </DataBand>
+  </ReportPage>
+</Report>
