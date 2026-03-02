@@ -55,7 +55,7 @@
         <TableColumn Name="Column8" Width="162.31"/>
         <TableRow Name="Row2" Height="37.8">
           <TableCell Name="Cell6" Border.Lines="All" Text="№ п\п" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
-          <TableCell Name="Cell19" Text="Штрих-код" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+          <TableCell Name="Cell19" Text="Штрихкод" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
           <TableCell Name="Cell7" Border.Lines="Left, Right" Border.TopLine.Width="2" Border.BottomLine.Width="2" Text="Наименование" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
           <TableCell Name="Cell24" Border.Lines="Left" Text="Цена" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
           <TableCell Name="Cell8" Border.Lines="Left" Border.TopLine.Width="2" Border.RightLine.Width="2" Border.BottomLine.Width="2" Text="Кол-во" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
