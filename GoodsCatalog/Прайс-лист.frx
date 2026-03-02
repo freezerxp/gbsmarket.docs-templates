@@ -81,7 +81,7 @@ namespace FastReport
         <TableColumn Name="Column26" Width="75.6"/>
         <TableRow Name="Row2" Height="37.8">
           <TableCell Name="Cell6" Border.Lines="All" Text="№ п/п" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
-          <TableCell Name="Cell7" Border.Lines="All" Text="Штрих-код" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell7" Border.Lines="All" Text="Штрихкод" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
           <TableCell Name="Cell8" Border.Lines="All" Text="Категория" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
           <TableCell Name="Cell19" Border.Lines="Top, Bottom" Text="Наименование" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
           <TableCell Name="Cell20" Border.Lines="All" Text="Остаток" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
