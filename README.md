@@ -1,5 +1,14 @@
 # Шаблоны для GBS.Market
-Шаблоны документов/печатных форм для кассовой программы GBS.market
+Шаблоны документов/печатных форм для кассовой программы GBS.Market
+
+**Наши контакты:**
+
+- Сайт: https://gbsmarket.ru
+- Блог: https://blog.gbsmarket.ru
+- База знаний: https://kb.gbsmarket.ru
+- Email: support@gbsmarket.ru
+
+Скачать шаблоны:
 
 - [Скачать все шаблоны одним архивом](https://github.com/freezerxp/gbsmarket.docs-templates/archive/refs/heads/main.zip)
 
@@ -25,7 +34,8 @@
 - [Акты инвентаризации](/Inventory/)
 - [Заказы/резервы](/ClientOrders/)
 - [Производство](/Production/)
-
+- [Перемещение между торговыми точками](/SendWaybill/)
+- [Перемещение между складами](/SendWaybillStorage/)
 
 ### Справочники
 
@@ -39,6 +49,7 @@
 - [Мастер отчетов](/MasterReport/)
 - [Сводный отчет](/SummaryReport/)
 - [Отчет на Email](/EmailOrders/)
+- [Отчет продавца](/SellerReport/)
 
 ### Дополнительно
 
