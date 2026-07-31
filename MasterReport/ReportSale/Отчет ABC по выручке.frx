@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="06/06/2026 00:00:00" ReportInfo.Modified="06/06/2026 00:00:00" ReportInfo.CreatorVersion="2020.2.6.0">
+  <ScriptText>using System;
+using System.Collections.Generic;
+using System.Reflection;
+using FastReport;
+using FastReport.Data;&#xD;&#xA;using FastReport.Table;
+
+namespace FastReport
+{
+  public class ReportScript
+  {
+    private class ProductStat
+    {
+      public string Uid;
+      public string Name;
+      public decimal Quantity;
+      public decimal Sum;
+      public decimal Share;
+      public decimal AccumShare;
+      public string Abc = &quot;&quot;;
+    }
+
+    private bool _analyticsReady;
+    private readonly Dictionary&lt;string, ProductStat&gt; _stats = new Dictionary&lt;string, ProductStat&gt;();
+
+    public string BuildAnalytics()
+    {
+      if (_analyticsReady)
+        return &quot;&quot;;
+
+      var data = Report.GetDataSource(&quot;items&quot;);
+      data.Init();
+
+      while (data.HasMoreRows)
+      {
+        var row = data.CurrentRow;
+        var uid = Convert.ToString(GetValue(row, &quot;Good.Uid&quot;));
+        if (String.IsNullOrEmpty(uid))
+        {
+          data.Next();
+          continue;
+        }
+
+        ProductStat stat;
+        if (!_stats.TryGetValue(uid, out stat))
+        {
+          stat = new ProductStat { Uid = uid, Name = Convert.ToString(GetValue(row, &quot;Good.Name&quot;)) };
+          _stats.Add(uid, stat);
+        }
+
+        stat.Quantity += ToDecimalValue(GetValue(row, &quot;Quantity&quot;));
+        stat.Sum += ToDecimalValue(GetValue(row, &quot;Sum&quot;));
+        data.Next();
+      }
+
+      var excludedUids = new List&lt;string&gt;();
+      foreach (var pair in _stats)
+        if (pair.Value.Quantity == 0m)
+          excludedUids.Add(pair.Key);
+      foreach (var uid in excludedUids)
+        _stats.Remove(uid);
+
+      var total = 0m;
+      foreach (var stat in _stats.Values)
+        total += stat.Sum;
+
+      var ordered = new List&lt;ProductStat&gt;(_stats.Values);
+      ordered.Sort((a, b) =&gt;
+      {
+        var sumComparison = b.Sum.CompareTo(a.Sum);
+        return sumComparison != 0 ? sumComparison : String.Compare(a.Name, b.Name, StringComparison.CurrentCulture);
+      });
+
+      var accum = 0m;
+      var aLimit = AbcALimit();
+      var bLimit = AbcBLimit(aLimit);
+      foreach (var stat in ordered)
+      {
+        if (total &lt;= 0)
+        {
+          stat.Share = 0;
+          stat.AccumShare = 0;
+          stat.Abc = &quot;C&quot;;
+          continue;
+        }
+
+        stat.Share = stat.Sum / total * 100m;
+        accum += stat.Share;
+        stat.AccumShare = accum;
+        stat.Abc = accum &lt;= aLimit ? &quot;A&quot; : accum &lt;= bLimit ? &quot;B&quot; : &quot;C&quot;;
+      }
+
+      _analyticsReady = true;
+      return &quot;&quot;;
+    }
+
+    public string AbcClass(int dummy)
+    {
+      return AbcClass(CurrentGoodUid());
+    }
+
+    public string AbcClass(object uid)
+    {
+      BuildAnalytics();
+      var stat = Find(uid);
+      return stat == null ? &quot;&quot; : stat.Abc;
+    }
+
+    public decimal AbcShare(int dummy)
+    {
+      return AbcShare(CurrentGoodUid());
+    }
+
+    public decimal AbcShare(object uid)
+    {
+      BuildAnalytics();
+      var stat = Find(uid);
+      return stat == null ? 0m : Math.Round(stat.Share, 2);
+    }
+
+    public decimal AbcRevenue(int dummy)
+    {
+      return AbcRevenue(CurrentGoodUid());
+    }
+
+    public decimal AbcRevenue(object uid)
+    {
+      BuildAnalytics();
+      var stat = Find(uid);
+      return stat == null ? 0m : stat.Sum;
+    }
+
+    public decimal AbcAccumShare(int dummy)
+    {
+      return AbcAccumShare(CurrentGoodUid());
+    }
+
+    public decimal AbcAccumShare(object uid)
+    {
+      BuildAnalytics();
+      var stat = Find(uid);
+      return stat == null ? 0m : Math.Round(stat.AccumShare, 2);
+    }
+
+    public int AbcSort(int dummy)
+    {
+      return AbcSort(CurrentGoodUid());
+    }
+
+    public int AbcSort(object uid)
+    {
+      var abc = AbcClass(uid);
+      return abc == &quot;A&quot; ? 1 : abc == &quot;B&quot; ? 2 : 3;
+    }
+
+    public decimal AbcLimitA(int dummy)
+    {
+      return AbcALimit();
+    }
+
+    public decimal AbcLimitB(int dummy)
+    {
+      return AbcBLimit(AbcALimit());
+    }
+
+    private decimal AbcALimit()&#xD;&#xA;    {&#xD;&#xA;      return ReadControlDecimal(&quot;AbcALimitBox&quot;, 80m);&#xD;&#xA;    }&#xD;&#xA;&#xD;&#xA;    private decimal AbcBLimit(decimal aLimit)&#xD;&#xA;    {&#xD;&#xA;      var value = ReadControlDecimal(&quot;AbcBLimitBox&quot;, 95m);&#xD;&#xA;      return value &lt; aLimit ? aLimit : value;&#xD;&#xA;    }&#xD;&#xA;&#xD;&#xA;    private decimal ReadControlDecimal(string controlName, decimal defaultValue)&#xD;&#xA;    {&#xD;&#xA;      var control = Report.FindObject(controlName);&#xD;&#xA;      if (control == null)&#xD;&#xA;        return defaultValue;&#xD;&#xA;&#xD;&#xA;      var property = control.GetType().GetProperty(&quot;Value&quot;, BindingFlags.Instance | BindingFlags.Public);&#xD;&#xA;      if (property == null)&#xD;&#xA;        return defaultValue;&#xD;&#xA;&#xD;&#xA;      var value = Convert.ToDecimal(property.GetValue(control, null));&#xD;&#xA;      if (value &lt; 0m)&#xD;&#xA;        return 0m;&#xD;&#xA;&#xD;&#xA;      return value &gt; 100m ? 100m : value;&#xD;&#xA;    }&#xD;&#xA;&#xD;&#xA;    public string PercentIncome(decimal sumSale, decimal sumIncome)
+    {
+      if(sumSale == 0)
+        return &quot;&quot;;
+
+      return Math.Round(sumIncome / sumSale * 100, 2) + &quot;%&quot;;
+    }
+
+    public decimal SoldQuantity(int dummy)
+    {
+      BuildAnalytics();
+      var stat = Find(CurrentGoodUid());
+      return stat == null ? 0m : stat.Quantity;
+    }
+
+    public void GroupFooter1_BeforePrint(object sender, EventArgs e)
+    {
+      GroupFooter1.Visible = SoldQuantity(0) != 0m;
+    }
+    private object CurrentGoodUid()
+    {
+      return Report.GetColumnValue(&quot;items.Good.Uid&quot;);
+    }
+
+    private ProductStat Find(object uid)
+    {
+      ProductStat stat;
+      return _stats.TryGetValue(Convert.ToString(uid), out stat) ? stat : null;
+    }
+
+    private static object GetValue(object source, string path)
+    {
+      var value = source;
+      foreach (var part in path.Split(new char[] { Convert.ToChar(46) }))
+      {
+        if (value == null)
+          return null;
+
+        var property = value.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public);
+        value = property == null ? null : property.GetValue(value, null);
+      }
+
+      return value;
+    }
+
+    private static decimal ToDecimalValue(object value)
+    {
+      return value == null ? 0m : Convert.ToDecimal(value);
+    }
+  }
+}
+</ScriptText>
+  <Dictionary>
+    <BusinessObjectDataSource Name="items" ReferenceName="items" DataType="null" Enabled="true">
+      <Column Name="Good" DataType="null">
+        <Column Name="Uid" DataType="System.Guid"/>
+        <Column Name="Name" DataType="System.String"/>
+        <Column Name="Group" DataType="null">
+          <Column Name="Name" DataType="System.String"/>
+        </Column>
+        <Column Name="Barcode" DataType="System.String"/>
+      </Column>
+      <Column Name="Quantity" DataType="System.Decimal"/>
+      <Column Name="Income" DataType="System.Decimal"/>
+      <Column Name="Sum" DataType="System.Decimal"/>
+      <Column Name="DocumentDate" DataType="System.DateTime"/>
+    </BusinessObjectDataSource>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyInfo" DataType="System.String"/>
+    <Parameter Name="DateStartReport" DataType="System.DateTime"/>
+    <Parameter Name="DateFinishReport" DataType="System.DateTime"/>
+    <Total Name="TotalCountGroup" Expression="[items.Quantity]" Evaluator="Data1" PrintOn="GroupFooter1"/>
+    <Total Name="TotalSumGroup" Expression="[items.Sum]" Evaluator="Data1" PrintOn="GroupFooter1"/>
+    <Total Name="TotalIncomeGroup" Expression="[items.Income]" Evaluator="Data1" PrintOn="GroupFooter1"/>
+    <Total Name="TotalCount" Expression="[items.Quantity]" Evaluator="Data1"/>
+    <Total Name="TotalSum" Expression="[items.Sum]" Evaluator="Data1"/>
+    <Total Name="TotalIncome" Expression="[items.Income]" Evaluator="Data1"/>
+  </Dictionary>
+  <ReportPage Name="Page1" Landscape="true" PaperWidth="297" PaperHeight="210" RawPaperSize="9" Watermark.Font="Arial, 60pt">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="94.5" CanGrow="true">
+      <TextObject Name="BuildAnalyticsText" Left="0" Top="0" Width="1" Height="1" Text="[BuildAnalytics()]" TextFill.Color="White" Font="Arial, 1pt"/>
+      <TextObject Name="Text4" Left="9.45" Top="9.45" Width="680.4" Height="18.9" CanGrow="true" Text="[CompanyName]" Font="Arial, 10pt"/>
+      <TextObject Name="Text1" Left="9.45" Top="28.35" Width="680.4" Height="18.9" CanGrow="true" Text="[CompanyInfo]" Font="Arial, 10pt"/>
+      <TextObject Name="Text5" Left="9.45" Top="56.7" Width="1027.23" Height="28.35" Text="Отчет: ABC-анализ по выручке (период с [DateStartReport] по [DateFinishReport])" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold">
+        <Formats>
+          <DateFormat/>
+          <DateFormat/>
+        </Formats>
+      </TextObject>
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="99.98" Width="1047.06" Height="37.8">
+      <TableObject Name="Table2" Left="9.45" Width="1011.15" Height="37.8">
+        <TableColumn Name="Column6" Width="47.25"/>
+        <TableColumn Name="Column7" Width="113.4"/>
+        <TableColumn Name="Column8" Width="113.4"/>
+        <TableColumn Name="Column19" Width="302.4"/>
+        <TableColumn Name="Column20" Width="75.6"/>
+        <TableColumn Name="Column26" Width="94.5"/>
+        <TableColumn Name="Column29" Width="94.5"/>
+        <TableColumn Name="Column31" Width="94.5"/>
+        <TableColumn Name="Column32" Width="75.6"/>
+        <TableRow Name="Row2" Height="37.8">
+          <TableCell Name="Cell6" Border.Lines="All" Text="№" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell7" Border.Lines="All" Text="Штрих-код" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell8" Border.Lines="All" Text="Категория" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell19" Border.Lines="All" Text="Наименование" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell20" Border.Lines="All" Text="Продано" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell26" Border.Lines="All" Text="Выручка" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell29" Border.Lines="All" Text="Прибыль" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell31" Border.Lines="All" Text="Доля&#xD;&#xA;выручки, %" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell32" Border.Lines="All" Text="ABC по&#xD;&#xA;выручке" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+        </TableRow>
+      </TableObject>
+    </PageHeaderBand>
+    <GroupHeaderBand Name="GroupHeader1" Top="143.26" Width="1047.06" Height="37.8" CanShrink="true" Condition="[items.Good.Uid]" SortOrder="None">
+      <DataBand Name="Data1" Top="186.54" Width="1047.06" Height="18.9" CanGrow="true" CanShrink="true" DataSource="items" Filter="SoldQuantity(0) != 0">
+        <Sort>
+          <Sort Expression="AbcRevenue(0)" Descending="true"/>&#xD;&#xA;          <Sort Expression="[items.Good.Name]"/>
+        </Sort>
+      </DataBand>
+      <GroupFooterBand Name="GroupFooter1" BeforePrintEvent="GroupFooter1_BeforePrint" Top="210.92" Width="1047.06" Height="18.9" CanGrow="true">
+        <TableObject Name="Table1" Left="9.45" Width="1011.15" Height="18.9" CanBreak="false" RepeatHeaders="false">
+          <TableColumn Name="Column1" Width="47.25"/>
+          <TableColumn Name="Column2" Width="113.4"/>
+          <TableColumn Name="Column3" Width="113.4"/>
+          <TableColumn Name="Column21" Width="302.4"/>
+          <TableColumn Name="Column22" Width="75.6"/>
+          <TableColumn Name="Column28" Width="94.5"/>
+          <TableColumn Name="Column30" Width="94.5"/>
+          <TableColumn Name="Column33" Width="94.5"/>
+          <TableColumn Name="Column34" Width="75.6"/>
+          <TableRow Name="Row1" MaxHeight="75.6" AutoSize="true">
+            <TableCell Name="Cell1" Border.Lines="All" Text="[Row#]" HorzAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell2" Border.Lines="All" Text="[items.Good.Barcode]" Font="Arial, 10pt"/>
+            <TableCell Name="Cell3" Border.Lines="All" Text="[items.Good.Group.Name]" Font="Arial, 10pt"/>
+            <TableCell Name="Cell21" Border.Lines="All" Text="[items.Good.Name]" Font="Arial, 10pt"/>
+            <TableCell Name="Cell22" Border.Lines="All" Text="[TotalCountGroup]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+            <TableCell Name="Cell28" Border.Lines="All" Text="[TotalSumGroup]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+            <TableCell Name="Cell30" Border.Lines="All" Text="[TotalIncomeGroup]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+            <TableCell Name="Cell33" Border.Lines="All" Text="[AbcShare(0)]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+            <TableCell Name="Cell34" Border.Lines="All" Text="[AbcClass(0)]" HorzAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          </TableRow>
+        </TableObject>
+      </GroupFooterBand>
+    </GroupHeaderBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="235.3" Width="1047.06" Height="28.35">
+      <TableObject Name="TableTotal" Left="9.45" Top="0" Width="1011.15" Height="18.9">
+        <TableColumn Name="TotalColumn1" Width="47.25"/>
+        <TableColumn Name="TotalColumn2" Width="113.4"/>
+        <TableColumn Name="TotalColumn3" Width="113.4"/>
+        <TableColumn Name="TotalColumn4" Width="302.4"/>
+        <TableColumn Name="TotalColumn5" Width="75.6"/>
+        <TableColumn Name="TotalColumn6" Width="94.5"/>
+        <TableColumn Name="TotalColumn7" Width="94.5"/>
+        <TableColumn Name="TotalColumn8" Width="94.5"/>
+        <TableColumn Name="TotalColumn9" Width="75.6"/>
+        <TableRow Name="TotalRow" Height="18.9">
+          <TableCell Name="TotalCell1" Border.Lines="All"/>
+          <TableCell Name="TotalCell2" Border.Lines="All"/>
+          <TableCell Name="TotalCell3" Border.Lines="All"/>
+          <TableCell Name="TotalCell4" Border.Lines="All" Text="ИТОГО:" HorzAlign="Right" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="TotalCell5" Border.Lines="All" Text="[TotalCount]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="TotalCell6" Border.Lines="All" Text="[TotalSum]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="TotalCell7" Border.Lines="All" Text="[TotalIncome]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="TotalCell8" Border.Lines="All"/>
+          <TableCell Name="TotalCell9" Border.Lines="All"/>
+        </TableRow>
+      </TableObject>
+    </ReportSummaryBand>
+  </ReportPage></Report>

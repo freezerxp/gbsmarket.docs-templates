@@ -1,0 +1,390 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="06/06/2026 00:00:00" ReportInfo.Modified="06/06/2026 00:00:00" ReportInfo.CreatorVersion="2020.2.6.0">
+  <ScriptText>using System;
+using System.Collections.Generic;
+using System.Reflection;
+using FastReport;
+using FastReport.Data;&#xD;&#xA;using FastReport.Table;
+
+namespace FastReport
+{
+  public class ReportScript
+  {
+    private class ProductStat
+    {
+      public string Uid;
+      public decimal Quantity;
+      public decimal Sum;
+      public decimal Average;
+      public decimal Variation;
+      public string Xyz = &quot;&quot;;
+      public readonly Dictionary&lt;DateTime, decimal&gt; PeriodSums = new Dictionary&lt;DateTime, decimal&gt;();
+    }
+
+    private enum PeriodGranularity
+    {
+      Day,
+      Week,
+      Month
+    }
+
+    private bool _analyticsReady;
+    private int _periodCount = 1;
+    private PeriodGranularity _periodGranularity;
+    private DateTime _reportStart;
+    private const decimal XyzXLimit = 10m;
+    private const decimal XyzYLimit = 25m;
+    private readonly Dictionary&lt;string, ProductStat&gt; _stats = new Dictionary&lt;string, ProductStat&gt;();
+
+    public string BuildAnalytics()
+    {
+      if (_analyticsReady)
+        return &quot;&quot;;
+
+      var dateStart = ((DateTime)Report.GetParameterValue(&quot;DateStartReport&quot;)).Date;
+      var dateFinish = ((DateTime)Report.GetParameterValue(&quot;DateFinishReport&quot;)).Date;
+      _periodGranularity = GetPeriodGranularity(dateStart, dateFinish);
+      _reportStart = dateStart;
+      _periodCount = GetCompletePeriodCount(dateStart, dateFinish);
+      if (_periodCount == 0)
+      {
+        _analyticsReady = true;
+        return &quot;&quot;;
+      }
+      var lastPeriodExclusive = AddPeriods(_reportStart, _periodCount);
+
+      var data = Report.GetDataSource(&quot;items&quot;);
+      data.Init();
+
+      while (data.HasMoreRows)
+      {
+        var row = data.CurrentRow;
+        var uid = Convert.ToString(GetValue(row, &quot;Good.Uid&quot;));
+        if (String.IsNullOrEmpty(uid))
+        {
+          data.Next();
+          continue;
+        }
+
+        ProductStat stat;
+        if (!_stats.TryGetValue(uid, out stat))
+        {
+          stat = new ProductStat { Uid = uid };
+          _stats.Add(uid, stat);
+        }
+
+        var sum = ToDecimalValue(GetValue(row, &quot;Sum&quot;));
+        var date = GetPeriodStart(((DateTime)GetValue(row, &quot;DocumentDate&quot;)).Date);
+        if (date &lt; _reportStart || date &gt;= lastPeriodExclusive)
+        {
+          data.Next();
+          continue;
+        }
+        stat.Quantity += ToDecimalValue(GetValue(row, &quot;Quantity&quot;));
+        stat.Sum += sum;
+
+        if (!stat.PeriodSums.ContainsKey(date))
+          stat.PeriodSums.Add(date, 0m);
+        stat.PeriodSums[date] += sum;
+
+        data.Next();
+      }
+
+      var excludedUids = new List&lt;string&gt;();
+      foreach (var pair in _stats)
+        if (pair.Value.Quantity == 0m)
+          excludedUids.Add(pair.Key);
+      foreach (var uid in excludedUids)
+        _stats.Remove(uid);
+
+      foreach (var stat in _stats.Values)
+      {
+        stat.Average = stat.Sum / _periodCount;
+        if (stat.Average == 0)
+        {
+          stat.Variation = 0;
+          stat.Xyz = &quot;Z&quot;;
+          continue;
+        }
+
+        var variance = 0d;
+        for (var i = 0; i &lt; _periodCount; i++)
+        {
+          var date = AddPeriods(_reportStart, i);
+          decimal value;
+          stat.PeriodSums.TryGetValue(date, out value);
+          var delta = (double)(value - stat.Average);
+          variance += delta * delta;
+        }
+
+        var std = Math.Sqrt(variance / _periodCount);
+        stat.Variation = (decimal)std / Math.Abs(stat.Average) * 100m;
+        stat.Xyz = stat.Variation &lt;= XyzXLimit ? &quot;X&quot; : stat.Variation &lt;= XyzYLimit ? &quot;Y&quot; : &quot;Z&quot;;
+      }
+
+      _analyticsReady = true;
+      return &quot;&quot;;
+    }
+
+    public string XyzClass(int dummy)
+    {
+      return XyzClass(CurrentGoodUid());
+    }
+
+    public string XyzClass(object uid)
+    {
+      BuildAnalytics();
+      var stat = Find(uid);
+      return stat == null ? &quot;&quot; : stat.Xyz;
+    }
+
+    public decimal XyzAverage(int dummy)
+    {
+      return XyzAverage(CurrentGoodUid());
+    }
+
+    public decimal XyzAverage(object uid)
+    {
+      BuildAnalytics();
+      var stat = Find(uid);
+      return stat == null ? 0m : Math.Round(stat.Average, 2);
+    }
+
+    public decimal XyzVariation(int dummy)
+    {
+      return XyzVariation(CurrentGoodUid());
+    }
+
+    public decimal XyzVariation(object uid)
+    {
+      BuildAnalytics();
+      var stat = Find(uid);
+      return stat == null ? 0m : Math.Round(stat.Variation, 2);
+    }
+
+    public int XyzSort(int dummy)
+    {
+      return XyzSort(CurrentGoodUid());
+    }
+
+    public int XyzSort(object uid)
+    {
+      var xyz = XyzClass(uid);
+      return xyz == &quot;X&quot; ? 1 : xyz == &quot;Y&quot; ? 2 : 3;
+    }
+
+    public decimal XyzLimitX(int dummy)
+    {
+      return XyzXLimit;
+    }
+
+    public decimal XyzLimitY(int dummy)
+    {
+      return XyzYLimit;
+    }
+
+    public decimal SoldQuantity(int dummy)
+    {
+      BuildAnalytics();
+      var stat = Find(CurrentGoodUid());
+      return stat == null ? 0m : stat.Quantity;
+    }
+
+    public void GroupFooter1_BeforePrint(object sender, EventArgs e)
+    {
+      GroupFooter1.Visible = SoldQuantity(0) != 0m;
+    }
+    private object CurrentGoodUid()
+    {
+      return Report.GetColumnValue(&quot;items.Good.Uid&quot;);
+    }
+
+    private ProductStat Find(object uid)
+    {
+      ProductStat stat;
+      return _stats.TryGetValue(Convert.ToString(uid), out stat) ? stat : null;
+    }
+
+    private PeriodGranularity GetPeriodGranularity(DateTime dateStart, DateTime dateFinish)
+    {
+      var days = (dateFinish - dateStart).Days + 1;
+      return days &lt;= 31 ? PeriodGranularity.Day : days &lt;= 183 ? PeriodGranularity.Week : PeriodGranularity.Month;
+    }
+
+    private DateTime GetPeriodStart(DateTime date)
+    {
+      if (_periodGranularity == PeriodGranularity.Day)
+        return date.Date;
+
+      if (_periodGranularity == PeriodGranularity.Week)
+        return _reportStart.AddDays((date.Date - _reportStart).Days / 7 * 7);
+
+      var periodStart = _reportStart;
+      while (periodStart.AddMonths(1) &lt;= date)
+        periodStart = periodStart.AddMonths(1);
+      return periodStart;
+    }
+
+    private int GetCompletePeriodCount(DateTime dateStart, DateTime dateFinish)
+    {
+      var days = (dateFinish - dateStart).Days + 1;
+      if (_periodGranularity == PeriodGranularity.Day)
+        return days;
+
+      if (_periodGranularity == PeriodGranularity.Week)
+        return days / 7;
+
+      var count = 0;
+      while (dateStart.AddMonths(count + 1) &lt;= dateFinish.AddDays(1))
+        count++;
+      return count;
+    }
+
+    private DateTime AddPeriods(DateTime firstPeriod, int index)
+    {
+      if (_periodGranularity == PeriodGranularity.Day)
+        return firstPeriod.AddDays(index);
+
+      if (_periodGranularity == PeriodGranularity.Week)
+        return firstPeriod.AddDays(index * 7);
+
+      return firstPeriod.AddMonths(index);
+    }
+
+    private static object GetValue(object source, string path)
+    {
+      var value = source;
+      foreach (var part in path.Split(new char[] { Convert.ToChar(46) }))
+      {
+        if (value == null)
+          return null;
+
+        var property = value.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public);
+        value = property == null ? null : property.GetValue(value, null);
+      }
+
+      return value;
+    }
+
+    private static decimal ToDecimalValue(object value)
+    {
+      return value == null ? 0m : Convert.ToDecimal(value);
+    }
+  }
+}
+</ScriptText>
+  <Dictionary>
+    <BusinessObjectDataSource Name="items" ReferenceName="items" DataType="null" Enabled="true">
+      <Column Name="Good" DataType="null">
+        <Column Name="Uid" DataType="System.Guid"/>
+        <Column Name="Name" DataType="System.String"/>
+        <Column Name="Group" DataType="null">
+          <Column Name="Name" DataType="System.String"/>
+        </Column>
+        <Column Name="Barcode" DataType="System.String"/>
+      </Column>
+      <Column Name="Quantity" DataType="System.Decimal"/>
+      <Column Name="Sum" DataType="System.Decimal"/>
+      <Column Name="DocumentDate" DataType="System.DateTime"/>
+    </BusinessObjectDataSource>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyInfo" DataType="System.String"/>
+    <Parameter Name="DateStartReport" DataType="System.DateTime"/>
+    <Parameter Name="DateFinishReport" DataType="System.DateTime"/>
+    <Total Name="TotalCountGroup" Expression="[items.Quantity]" Evaluator="Data1" PrintOn="GroupFooter1"/>
+    <Total Name="TotalSumGroup" Expression="[items.Sum]" Evaluator="Data1" PrintOn="GroupFooter1"/>
+    <Total Name="TotalCount" Expression="[items.Quantity]" Evaluator="Data1"/>
+    <Total Name="TotalSum" Expression="[items.Sum]" Evaluator="Data1"/>
+  </Dictionary>
+  <ReportPage Name="Page1" Landscape="true" PaperWidth="297" PaperHeight="210" RawPaperSize="9" Watermark.Font="Arial, 60pt">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="94.5" CanGrow="true">
+      <TextObject Name="BuildAnalyticsText" Left="0" Top="0" Width="1" Height="1" Text="[BuildAnalytics()]" TextFill.Color="White" Font="Arial, 1pt"/>
+      <TextObject Name="Text4" Left="9.45" Top="9.45" Width="680.4" Height="18.9" CanGrow="true" Text="[CompanyName]" Font="Arial, 10pt"/>
+      <TextObject Name="Text1" Left="9.45" Top="28.35" Width="680.4" Height="18.9" CanGrow="true" Text="[CompanyInfo]" Font="Arial, 10pt"/>
+      <TextObject Name="Text5" Left="9.45" Top="56.7" Width="1027.23" Height="28.35" Text="Отчет: XYZ-анализ продаж по выручке (период с [DateStartReport] по [DateFinishReport])" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold">
+        <Formats>
+          <DateFormat/>
+          <DateFormat/>
+        </Formats>
+      </TextObject>
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="99.98" Width="1047.06" Height="37.8">
+      <TableObject Name="Table2" Left="9.45" Width="1011.15" Height="37.8">
+        <TableColumn Name="Column6" Width="47.25"/>
+        <TableColumn Name="Column7" Width="113.4"/>
+        <TableColumn Name="Column8" Width="113.4"/>
+        <TableColumn Name="Column19" Width="321.3"/>
+        <TableColumn Name="Column20" Width="75.6"/>
+        <TableColumn Name="Column26" Width="94.5"/>
+        <TableColumn Name="Column29" Width="94.5"/>
+        <TableColumn Name="Column31" Width="85.05"/>
+        <TableColumn Name="Column32" Width="66.15"/>
+        <TableRow Name="Row2" Height="37.8">
+          <TableCell Name="Cell6" Border.Lines="All" Text="№" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell7" Border.Lines="All" Text="Штрих-код" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell8" Border.Lines="All" Text="Категория" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell19" Border.Lines="All" Text="Наименование" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell20" Border.Lines="All" Text="Продано" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell26" Border.Lines="All" Text="Выручка" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell29" Border.Lines="All" Text="Средн. за период" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell31" Border.Lines="All" Text="CV, %" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell32" Border.Lines="All" Text="XYZ" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+        </TableRow>
+      </TableObject>
+    </PageHeaderBand>
+    <GroupHeaderBand Name="GroupHeader1" Top="143.26" Width="1047.06" Height="37.8" CanShrink="true" Condition="[items.Good.Uid]" SortOrder="None">
+      <DataBand Name="Data1" Top="186.54" Width="1047.06" Height="18.9" CanGrow="true" CanShrink="true" DataSource="items" Filter="SoldQuantity(0) != 0">
+        <Sort>
+          <Sort Expression="XyzVariation(0)"/>&#xD;&#xA;          <Sort Expression="[items.Good.Name]"/>
+        </Sort>
+      </DataBand>
+      <GroupFooterBand Name="GroupFooter1" BeforePrintEvent="GroupFooter1_BeforePrint" Top="210.92" Width="1047.06" Height="18.9" CanGrow="true">
+        <TableObject Name="Table1" Left="9.45" Width="1011.15" Height="18.9" CanBreak="false" RepeatHeaders="false">
+          <TableColumn Name="Column1" Width="47.25"/>
+          <TableColumn Name="Column2" Width="113.4"/>
+          <TableColumn Name="Column3" Width="113.4"/>
+          <TableColumn Name="Column21" Width="321.3"/>
+          <TableColumn Name="Column22" Width="75.6"/>
+          <TableColumn Name="Column28" Width="94.5"/>
+          <TableColumn Name="Column30" Width="94.5"/>
+          <TableColumn Name="Column33" Width="85.05"/>
+          <TableColumn Name="Column34" Width="66.15"/>
+          <TableRow Name="Row1" MaxHeight="75.6" AutoSize="true">
+            <TableCell Name="Cell1" Border.Lines="All" Text="[Row#]" HorzAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell2" Border.Lines="All" Text="[items.Good.Barcode]" Font="Arial, 10pt"/>
+            <TableCell Name="Cell3" Border.Lines="All" Text="[items.Good.Group.Name]" Font="Arial, 10pt"/>
+            <TableCell Name="Cell21" Border.Lines="All" Text="[items.Good.Name]" Font="Arial, 10pt"/>
+            <TableCell Name="Cell22" Border.Lines="All" Text="[TotalCountGroup]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+            <TableCell Name="Cell28" Border.Lines="All" Text="[TotalSumGroup]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+            <TableCell Name="Cell30" Border.Lines="All" Text="[XyzAverage(0)]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+            <TableCell Name="Cell33" Border.Lines="All" Text="[XyzVariation(0)]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt"/>
+            <TableCell Name="Cell34" Border.Lines="All" Text="[XyzClass(0)]" HorzAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          </TableRow>
+        </TableObject>
+      </GroupFooterBand>
+    </GroupHeaderBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="235.3" Width="1047.06" Height="28.35">
+      <TableObject Name="TableTotal" Left="9.45" Top="0" Width="1011.15" Height="18.9">
+        <TableColumn Name="TotalColumn1" Width="47.25"/>
+        <TableColumn Name="TotalColumn2" Width="113.4"/>
+        <TableColumn Name="TotalColumn3" Width="113.4"/>
+        <TableColumn Name="TotalColumn4" Width="321.3"/>
+        <TableColumn Name="TotalColumn5" Width="75.6"/>
+        <TableColumn Name="TotalColumn6" Width="94.5"/>
+        <TableColumn Name="TotalColumn7" Width="94.5"/>
+        <TableColumn Name="TotalColumn8" Width="85.05"/>
+        <TableColumn Name="TotalColumn9" Width="66.15"/>
+        <TableRow Name="TotalRow" Height="18.9">
+          <TableCell Name="TotalCell1" Border.Lines="All"/>
+          <TableCell Name="TotalCell2" Border.Lines="All"/>
+          <TableCell Name="TotalCell3" Border.Lines="All"/>
+          <TableCell Name="TotalCell4" Border.Lines="All" Text="ИТОГО:" HorzAlign="Right" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="TotalCell5" Border.Lines="All" Text="[TotalCount]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="TotalCell6" Border.Lines="All" Text="[TotalSum]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="TotalCell7" Border.Lines="All"/>
+          <TableCell Name="TotalCell8" Border.Lines="All"/>
+          <TableCell Name="TotalCell9" Border.Lines="All"/>
+        </TableRow>
+      </TableObject>
+    </ReportSummaryBand>
+  </ReportPage></Report>
