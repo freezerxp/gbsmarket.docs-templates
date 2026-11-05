@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="06/20/2009 22:40:42" ReportInfo.Modified="10/01/2026 13:39:47" ReportInfo.CreatorVersion="2022.3.12.0">
+  <Dictionary>
+    <BusinessObjectDataSource Name="items" ReferenceName="items" DataType="null" Enabled="true">
+      <Column Name="DocumentsType" DataType="System.Int32"/>
+      <Column Name="IsFiscal" DataType="System.Boolean" BindableControl="CheckBox"/>
+      <Column Name="DocumentUid" DataType="System.Guid"/>
+      <Column Name="GoodUid" DataType="System.Guid"/>
+      <Column Name="Good" DataType="null">
+        <Column Name="Uid" DataType="System.Guid"/>
+        <Column Name="Id" DataType="System.Int32"/>
+        <Column Name="Name" DataType="System.String"/>
+        <Column Name="Group" DataType="null">
+          <Column Name="Uid" DataType="System.Guid"/>
+          <Column Name="Name" DataType="System.String"/>
+          <Column Name="ParentGroupUid" DataType="System.Guid"/>
+          <Column Name="GoodsType" DataType="System.String"/>
+          <Column Name="UnitsUid" DataType="System.Guid"/>
+          <Column Name="NeedComment" DataType="System.Boolean" BindableControl="CheckBox"/>
+          <Column Name="IsDataParent" DataType="System.Boolean" BindableControl="CheckBox"/>
+          <Column Name="IsRequestCount" DataType="System.Boolean" BindableControl="CheckBox"/>
+          <Column Name="TaxRateNumber" DataType="System.Int32"/>
+          <Column Name="KkmSectionNumber" DataType="System.Int32"/>
+          <Column Name="IsFreePrice" DataType="System.Boolean" BindableControl="CheckBox"/>
+          <Column Name="DecimalPlace" DataType="System.Int32"/>
+          <Column Name="RuTaxSystem" DataType="System.String"/>
+          <Column Name="RuFfdGoodsType" DataType="System.String"/>
+          <Column Name="RuMarkedProductionType" DataType="System.String"/>
+          <Column Name="TaxRateNumberText" DataType="System.String"/>
+        </Column>
+        <Column Name="Barcode" DataType="System.String"/>
+        <Column Name="Barcodes" DataType="System.String"/>
+        <Column Name="UnitName" DataType="System.String"/>
+        <Column Name="Unit" DataType="null">
+          <Column Name="FullName" DataType="System.String"/>
+          <Column Name="ShortName" DataType="System.String"/>
+          <Column Name="Code" DataType="System.String"/>
+        </Column>
+        <Column Name="VatValue" DataType="System.Decimal"/>
+        <Column Name="NdsName" DataType="System.String"/>
+        <Column Name="NdsValue" DataType="System.Decimal"/>
+        <Column Name="TotalCount" DataType="System.Decimal"/>
+        <Column Name="Description" DataType="System.String"/>
+        <BusinessObjectDataSource Name="BusinessObjectDataSource1" Alias="Properties" Enabled="false" DataType="System.Collections.Generic.Dictionary`2[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]" PropName="Properties"/>
+      </Column>
+      <Column Name="Quantity" DataType="System.Decimal"/>
+      <Column Name="Price" DataType="System.Decimal"/>
+      <Column Name="BuyPrice" DataType="System.Decimal"/>
+      <Column Name="Discount" DataType="System.Decimal"/>
+      <Column Name="Comment" DataType="System.String"/>
+      <Column Name="DiscountSum" DataType="System.Decimal"/>
+      <Column Name="Sum" DataType="System.Decimal"/>
+      <Column Name="SumLessNds" DataType="System.Decimal"/>
+      <Column Name="NdsValue" DataType="System.Decimal"/>
+      <Column Name="NdsSum" DataType="System.Decimal"/>
+      <Column Name="GoodModificationBarcode" DataType="System.String"/>
+      <Column Name="GoodModificationName" DataType="System.String"/>
+      <Column Name="GoodModificationDescription" DataType="System.String"/>
+      <Column Name="DisplayedName" DataType="System.String"/>
+    </BusinessObjectDataSource>
+    <BusinessObjectDataSource Name="documents" ReferenceName="documents" DataType="null" Enabled="true">
+      <Column Name="Uid" DataType="System.Guid"/>
+      <Column Name="Date" DataType="System.DateTime"/>
+      <Column Name="Number" DataType="System.String"/>
+      <Column Name="Comment" DataType="System.String"/>
+      <Column Name="Storage" DataType="System.String"/>
+      <Column Name="ContractorUid" DataType="System.Guid"/>
+      <Column Name="ContractorName" DataType="System.String"/>
+      <Column Name="UserName" DataType="System.String"/>
+      <Column Name="Status" DataType="System.String"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" Landscape="true" PaperWidth="500" PaperHeight="210" Watermark.Font="Arial, 60pt">
+    <ReportTitleBand Name="ReportTitle1" Width="1814.4" Height="103.95" CanGrow="true">
+      <TextObject Name="Text5" Left="9.45" Top="37.8" Width="1710.45" Height="28.35" Text="Список накладных" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+      <TableObject Name="Table2" Top="66.15" Width="1719.9" Height="37.8" ManualBuildAutoSpans="false">
+        <TableColumn Name="Column6" Width="94.5"/>
+        <TableColumn Name="Column7" Width="85.05"/>
+        <TableColumn Name="Column29" Width="94.5"/>
+        <TableColumn Name="Column28" Width="103.95"/>
+        <TableColumn Name="Column27" Width="103.95"/>
+        <TableColumn Name="Column26" Width="103.95"/>
+        <TableColumn Name="Column24" Width="122.85"/>
+        <TableColumn Name="Column36" Width="113.4"/>
+        <TableColumn Name="Column37" Width="340.2"/>
+        <TableColumn Name="Column8" Width="94.5"/>
+        <TableColumn Name="Column23"/>
+        <TableColumn Name="Column19" Width="113.4"/>
+        <TableColumn Name="Column20" Width="103.95"/>
+        <TableColumn Name="Column40" Width="103.95"/>
+        <TableColumn Name="Column41" Width="75.6"/>
+        <TableRow Name="Row2" Height="37.8">
+          <TableCell Name="Cell6" Border.Lines="All" Text="Дата" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell7" Border.Lines="All" Text="№ накладной" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell29" Border.Lines="All" Text="Склад" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell28" Border.Lines="All" Text="Поставщик" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell27" Border.Lines="All" Text="Сотрудник" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell26" Border.Lines="All" Text="Комментарий" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell24" Border.Lines="All" Text="Штрихкод" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell36" Border.Lines="All" Text="Категория" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell37" Border.Lines="All" Text="Наименование" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell8" Border.Lines="All" Text="Закупочная цена" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell23" Border.Lines="All" Text="Кол-во" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell19" Border.Lines="All" Text="Закупочная сумма" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell20" Border.Lines="All" Text="Розничная сумма" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell40" Border.Lines="All" Text="Розничная цена" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+          <TableCell Name="Cell41" Border.Lines="All" Text="Код товара" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt, style=Bold"/>
+        </TableRow>
+      </TableObject>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="107.99" Width="1814.4" Height="18.9" CanGrow="true" CanShrink="true" DataSource="documents">
+      <DataBand Name="Data2" Top="172.77" Width="1814.4" Height="37.8" DataSource="items" Filter="[items.DocumentUid]==[documents.Uid]">
+        <TableObject Name="Table3" Width="1719.9" Height="37.8" ManualBuildAutoSpans="false">
+          <TableColumn Name="Column42" Width="94.5"/>
+          <TableColumn Name="Column43" Width="85.05"/>
+          <TableColumn Name="Column44" Width="94.5"/>
+          <TableColumn Name="Column45" Width="103.95"/>
+          <TableColumn Name="Column46" Width="103.95"/>
+          <TableColumn Name="Column47" Width="103.95"/>
+          <TableColumn Name="Column49" Width="122.85"/>
+          <TableColumn Name="Column50" Width="113.4"/>
+          <TableColumn Name="Column51" Width="340.2"/>
+          <TableColumn Name="Column52" Width="94.5"/>
+          <TableColumn Name="Column53"/>
+          <TableColumn Name="Column54" Width="113.4"/>
+          <TableColumn Name="Column55" Width="103.95"/>
+          <TableColumn Name="Column56" Width="103.95"/>
+          <TableColumn Name="Column57" Width="75.6"/>
+          <TableRow Name="Row3" Height="37.8">
+            <TableCell Name="Cell42" Border.Lines="All" Text="[documents.Date]" Format="Date" Format.Format="d" HorzAlign="Center" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell43" Border.Lines="All" Text="[documents.Number]" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell44" Border.Lines="All" Text="[documents.Storage]" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell45" Border.Lines="All" Text="[documents.ContractorName]" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell46" Border.Lines="All" Text="[documents.UserName]" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell47" Border.Lines="All" Text="[documents.Comment]" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell49" Border.Lines="All" Text="[items.Good.Barcode]" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell50" Border.Lines="All" Text="[items.Good.Group.Name]" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell51" Border.Lines="All" Text="[items.DisplayedName]" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell52" Border.Lines="All" Text="[items.BuyPrice]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="3" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell53" Border.Lines="All" Text="[items.Quantity]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="3" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell54" Border.Lines="All" Text="[[items.Quantity]*[items.BuyPrice]]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="3" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell55" Border.Lines="All" Text="[[items.Quantity]*[items.Price]]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell56" Border.Lines="All" Text="[items.Price]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" HorzAlign="Right" VertAlign="Center" Font="Arial, 10pt"/>
+            <TableCell Name="Cell57" Border.Lines="All" Text="[items.Good.Id]" VertAlign="Center" Font="Arial, 10pt"/>
+          </TableRow>
+        </TableObject>
+        <DataHeaderBand Name="DataHeader1" Top="130.93" Width="1814.4" Height="37.8" CanShrink="true"/>
+      </DataBand>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="214.61" Width="1814.4" Height="141.75"/>
+  </ReportPage>
+</Report>
